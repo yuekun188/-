@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>学生管理主界面</title>
+
+	<!-- 引入EasyUI资源文件 -->
+	<link rel="stylesheet" type="text/css" href="jquery-easyui-1.3.3/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="jquery-easyui-1.3.3/themes/icon.css">
+	<script type="text/javascript" src="jquery-easyui-1.3.3/jquery.min.js"></script>
+	<script type="text/javascript" src="jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
+	
+	<style>
+	
+		#searchBox{
+			margin-top: 16px;
+		    background: #fff8f8;
+		    padding: 4px;
+		    font-size: 14px;
+		    width: 500px;
+		}
+	
+	</style>
+	
+	
+	<script type="text/javascript">
+	
+		//搜索用户
+		function searchUser(){
+			var username = $('#username_search').val(); //用户名
+			var name = $('#nickname_search').val(); //姓名
+			
+			$("#grid0").datagrid('load',{
+				username : username,
+				name : name
+			});
+			
+		}
+	
+		function openUserAddPage(){
+			$("#dlg").dialog("open");
+			
+		}
+		
+		
+		function saveUser(){
+			var username = $('#username').val();
+			var password = $('#password').val();
+			var name = $('#name').val();
+			var sex = $('#sex').combobox('getValue');
+			
+		
+			if(!username){
+				alert("用户名不能为空！");
+				return;
+			}
+			
+			if(!password){
+				alert("密码不能为空！");
+				return;
+			}
+			
+			if(!name){
+				alert("姓名不能为空！");
+				return;
+			}
+			
+			if(!password){
+				alert("性别不能为空！"); 
+				return;
+			}
+			
+			//开始拼接json数据，为了传递给后台
+			var json = {};
+			json.username = username;
+			json.password = password;
+			json.name = name;
+			json.sex = sex;
+			
+			console.log(json); 
+			
+			//使用ajax传递到后台
+			$.post("addUser.do",json,function(data){
+				//这里是处理返回数据的回调函数 
+				
+				
+				if(data.errCode < 0){
+					alert('操作发生错误，原因是：' + data.errMsg);
+				}else{
+					alert('保存成功');
+				}
+				
+			},"json");
+			
+		}
+	
+	</script>
+
+
+</head>
+<body>
+	
+	<!-- 工具栏 -->
+	<div id="toolbar">
+		<a href="javascript:openUserAddPage()" class="easyui-linkbutton" iconCls="icon-add" >新增用户</a>
+		<a href="javascript:openUserModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" >编辑用户</a>
+		<a href="javascript:delUser()" class="easyui-linkbutton" iconCls="icon-remove">删除用户</a>
+		<a href="javascript:resetPassword()" class="easyui-linkbutton" iconCls="icon-modifyPassword">密码重置</a>
+	</div>
+	
+	<!-- 搜索栏 -->
+	<div id="searchBox">
+		&nbsp;用户名&nbsp;<input type="text" id="username_search" size="20" onkeydown="if(event.keyCode==13) searchUser()"/>
+		&nbsp;姓名&nbsp;<input type="text" id="nickname_search" size="20" onkeydown="if(event.keyCode==13) searchUser()"/>
+		
+		<a href="javascript:searchUser()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+	</div>
+	
+	<br>
+	
+	<!-- 数据列表 -->
+	<table id="grid0" class="easyui-datagrid" title="用户列表" style="width:980px;height:550px"
+			data-options="pagination:true,pageSize:10,rownumbers:true,fitColumns:true,
+			singleSelect:false,collapsible:false,url:'getUsers.do'">
+		<thead>
+			<tr>
+				<th data-options="field:'ck',checkbox:true"></th>
+				<th data-options="field:'username',width:80">用户名</th>
+				<th data-options="field:'password',width:100">密码</th>
+				<th data-options="field:'name',width:120">姓名</th>
+				<th data-options="field:'sex',width:120" >性别</th>
+			</tr>
+		</thead>
+	</table>
+	
+	
+		<div id="dlg" class="easyui-dialog" title="新增用户" style="width: 300px;height: 300px;padding: 10px 20px" closed="true" buttons="#dlg-buttons">
+			<form id="fm" method="post">
+				<!-- 这里画了一个table -->
+				<table cellspacing="8px">
+					<!-- 这个是table的第一行 -->
+					<tr>
+						<td>用户名：</td> 
+						<td>
+							<input type="text" id="username" name="username" class="easyui-validatebox" required="true" />
+						</td>
+					</tr>
+					<tr>
+						<td>密码：</td>
+						<td>
+							<input type="text" id="password" name="password" class="easyui-validatebox" required="true" />
+						</td>
+					</tr>
+					<!-- 这个是table的第二行 -->
+					
+					<tr>
+						<td>姓名：</td>
+						<td>
+							<input type="text" id="name" name="name" class="easyui-validatebox" required="true"/>
+						</td>
+					</tr>
+					
+					<tr>
+						<td>性别：</td>
+						<td>
+							<select class="easyui-combobox" data-options="value:'男'"  style="width: 144px" id="sex"  required="true"
+								editable="false" panelHeight="auto">
+								<option value="男">男</option>
+								<option value="女">女</option>
+							</select>
+						</td>
+					</tr>
+					
+				</table>
+			</form>
+		</div>
+		
+		<div id="dlg-buttons">
+			<a href="javascript:saveUser()" class="easyui-linkbutton" iconCls="icon-ok">保存</a>
+		</div>
+
+</body>
+</html>
